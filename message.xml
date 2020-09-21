@@ -1,0 +1,16 @@
+<tryton>
+    <data grouped="1">
+        <record model="ir.message" id="missing_customer">
+            <field name="text">Missing customer on order "%(order)s" from shop "%(shop)s"</field>
+        </record>
+        <record model="ir.message" id="missing_product">
+            <field name="text">Missing product "%(product)s" on order "%(order)s" from shop "%(shop)s"</field>
+        </record>
+        <record model="ir.message" id="country_not_found">
+            <field name="text">Missing country on order "%(order)s" from shop "%(shop)s"</field>
+        </record>
+        <record model="ir.message" id="subdivision_not_found">
+            <field name="text">Missing subdivision on order "%(order)s" from shop "%(shop)s"</field>
+        </record>
+    </data>
+</tryton>

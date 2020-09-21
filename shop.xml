@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tryton>
+    <data>
+        <record model="ir.ui.view" id="shop_view_list">
+            <field name="model">stock.shipment.ecommerce.shop</field>
+            <field name="type">tree</field>
+            <field name="name">shop_list</field>
+        </record>
+        <record model="ir.ui.view" id="shop_view_form">
+            <field name="model">stock.shipment.ecommerce.shop</field>
+            <field name="type">form</field>
+            <field name="name">shop_form</field>
+        </record>
+        <record model="ir.ui.view" id="shipment_out_view_form">
+            <field name="model">stock.shipment.out</field>
+            <field name="inherit" ref="stock.shipment_out_view_form" />
+            <field name="name">shipment_out_form</field>
+        </record>
+        <record model="ir.ui.view" id="template_view_form">
+            <field name="model">product.template</field>
+            <field name="inherit" ref="product.template_view_form" />
+            <field name="name">template_form</field>
+        </record>
+        <record model="ir.ui.view" id="template_view_tree">
+            <field name="model">product.template</field>
+            <field name="inherit" ref="product.template_view_tree" />
+            <field name="name">template_tree</field>
+        </record>
+        <record model="ir.ui.view" id="product_view_form">
+            <field name="model">product.product</field>
+            <field name="inherit" ref="product.product_view_form" />
+            <field name="name">product_form</field>
+        </record>
+        <record model="ir.ui.view" id="product_view_form_simple">
+            <field name="model">product.product</field>
+            <field name="inherit" ref="product.product_view_form_simple" />
+            <field name="name">product_form_simple</field>
+        </record>
+        <record model="ir.ui.view" id="product_view_tree">
+            <field name="model">product.product</field>
+            <field name="inherit" ref="product.product_view_tree" />
+            <field name="name">product_tree</field>
+        </record>
+        <record model="ir.action.act_window" id="act_shop">
+            <field name="name">Shop</field>
+            <field name="res_model">stock.shipment.ecommerce.shop</field>
+        </record>
+        <record model="ir.action.act_window.view" id="act_shop_list">
+            <field name="sequence" eval="10" />
+            <field name="view" ref="shop_view_list" />
+            <field name="act_window" ref="act_shop" />
+        </record>
+        <record model="ir.action.act_window.view" id="act_shop_form">
+            <field name="sequence" eval="20" />
+            <field name="view" ref="shop_view_form" />
+            <field name="act_window" ref="act_shop" />
+        </record>
+        <record model="ir.model.button" id="update_shop_shipments_button">
+            <field name="name">update_shop_shipments</field>
+            <field name="string">Update Shop Shipments</field>
+            <field name="model" search="[('model', '=', 'stock.shipment.ecommerce.shop')]" />
+        </record>
+        <record model="ir.model.button-res.group" id="update_shop_shipments_button_group_stock">
+            <field name="button" ref="update_shop_shipments_button" />
+            <field name="group" ref="stock.group_stock_admin" />
+        </record>
+        <record model="ir.cron" id="cron_shop_shipments_update">
+            <field name="active" eval="True" />
+            <field name="interval_number" eval="1" />
+            <field name="interval_type">hours</field>
+            <field name="method">stock.shipment.ecommerce.shop|update_shop_shipments</field>
+        </record>
+        <record model="ir.model.access" id="access_shop">
+            <field name="model" search="[('model', '=', 'stock.shipment.ecommerce.shop')]" />
+            <field name="perm_read" eval="False" />
+            <field name="perm_write" eval="False" />
+            <field name="perm_create" eval="False" />
+            <field name="perm_delete" eval="False" />
+        </record>
+        <record model="ir.model.access" id="access_shop_stock">
+            <field name="model" search="[('model', '=', 'stock.shipment.ecommerce.shop')]" />
+            <field name="group" ref="stock.group_stock" />
+            <field name="perm_read" eval="True" />
+            <field name="perm_write" eval="False" />
+            <field name="perm_create" eval="False" />
+            <field name="perm_delete" eval="False" />
+        </record>
+        <record model="ir.model.access" id="access_shop_stock_admin">
+            <field name="model" search="[('model', '=', 'stock.shipment.ecommerce.shop')]" />
+            <field name="group" ref="stock.group_stock_admin" />
+            <field name="perm_read" eval="True" />
+            <field name="perm_write" eval="True" />
+            <field name="perm_create" eval="True" />
+            <field name="perm_delete" eval="True" />
+        </record>
+        <!--menus-->
+        <menuitem id="menu_shop_view" sequence="2" icon="tryton-list" action="act_shop" parent="stock.menu_configuration" />
+    </data>
+</tryton>

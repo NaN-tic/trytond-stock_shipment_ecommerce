@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!-- The COPYRIGHT file at the top level of this repository contains the full
+     copyright notices and license terms. -->
+<form>
+    <label name="name"/>
+    <field name="name"/>
+    <label name="party"/>
+    <field name="party"/>
+    <label name="type"/>
+    <field name="type"/>
+    <label name="api_key"/>
+    <field name="api_key"/>
+    <label name="api_password"/>
+    <field name="api_password"/>
+    <label name="url"/>
+    <field name="url"/>
+    <label name="warehouse"/>
+    <field name="warehouse"/>
+    <group col="4" colspan="4" id="buttons">
+        <button name="update_shop_shipments" string="Update"/>
+    </group>
+</form>
