@@ -24,6 +24,11 @@ class Shop(ModelSQL, ModelView):
         domain=[('type', '=', 'warehouse')], required=True)
 
     @classmethod
+    def update_shop_shipments_cron(cls):
+        records = cls.search([])
+        cls.update_shop_shipments(records)
+
+    @classmethod
     @ModelView.button
     def update_shop_shipments(cls, records):
         for record in records:
@@ -144,7 +149,7 @@ class Shop(ModelSQL, ModelView):
                 move.quantity = line.quantity
                 products = Product.search([
                         ('template.party', '=', self.party),
-                        ('party_code','=', line.sku),
+                        ('party_code', '=', line.sku),
                         ], limit=1)
                 if not products:
                     raise (UserError(gettext('stock.shipment.ecommerce.missing_product',
@@ -192,18 +197,18 @@ class Template(metaclass=PoolMeta):
     party = fields.Many2One('party.party', 'Party')
 
 
-
 class Product(metaclass=PoolMeta):
     __name__ = 'product.product'
     party_code = fields.Char('Party Code',
         states={'required': Bool(Eval('party'))}, depends=['party'])
+
 
 class Cron(metaclass=PoolMeta):
     __name__ = 'ir.cron'
 
     @classmethod
     def __setup__(cls):
-        super().__setup__()
+        super(Cron, cls).__setup__()
         cls.method.selection.append(
-            ('stock.shipment.ecommerce.shop|update_shop_shipments', "Update Shipments"),
+            ('stock.shipment.ecommerce.shop|update_shop_shipments_cron', "Update Shipments"),
             )
