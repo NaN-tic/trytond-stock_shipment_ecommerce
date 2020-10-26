@@ -1,0 +1,83 @@
+#
+msgid ""
+msgstr "Content-Type: text/plain; charset=utf-8\n"
+
+msgctxt "field:party.party,shop:"
+msgid "Shop"
+msgstr "Tienda"
+
+msgctxt "field:stock.shipment.ecommerce.shop,api_key:"
+msgid "API Key"
+msgstr "Clave API"
+
+msgctxt "field:stock.shipment.ecommerce.shop,api_password:"
+msgid "API Password"
+msgstr "Contraseña API"
+
+msgctxt "field:stock.shipment.ecommerce.shop,name:"
+msgid "Name"
+msgstr "Nombre"
+
+msgctxt "field:stock.shipment.ecommerce.shop,party:"
+msgid "Party"
+msgstr "Tercero"
+
+msgctxt "field:stock.shipment.ecommerce.shop,type:"
+msgid "Type"
+msgstr "Tipo"
+
+msgctxt "field:stock.shipment.ecommerce.shop,url:"
+msgid "Shop URL"
+msgstr "URL de tienda"
+
+msgctxt "field:stock.shipment.ecommerce.shop,warehouse:"
+msgid "Warehouse"
+msgstr "Almacén"
+
+msgctxt "model:ir.action,name:act_shop"
+msgid "Shop"
+msgstr "Tienda"
+
+msgctxt "model:ir.message,text:country_not_found"
+msgid "Missing country on order \"%(order)s\" from shop \"%(shop)s\""
+msgstr ""
+"No se ha encontrado el país en el pedido \"%(order)s\" de la tienda "
+"\"%(shop)s\"\""
+
+msgctxt "model:ir.message,text:missing_customer"
+msgid "Missing customer on order \"%(order)s\" from shop \"%(shop)s\""
+msgstr ""
+"No se ha encontrado cliente en el pedido \"%(order)s\" de la tienda "
+"\"%(shop)s\"\""
+
+msgctxt "model:ir.message,text:missing_product"
+msgid "Missing product \"%(product)s\" on order \"%(order)s\" from shop \"%(shop)s\""
+msgstr ""
+"No se ha encontrado el producto \"%(product)s\" en el pedido \"%(order)s\" "
+"de la tienda \"%(shop)s\""
+
+msgctxt "model:ir.message,text:subdivision_not_found"
+msgid "Missing subdivision on order \"%(order)s\" from shop \"%(shop)s\""
+msgstr ""
+"No se ha encontrado subdivisión en el pedido \"%(order)s\" de la tienda "
+"\"%(shop)s\""
+
+msgctxt "model:ir.model.button,string:update_shop_shipments_button"
+msgid "Update Shop Shipments"
+msgstr "Actualizar albaranes de tienda"
+
+msgctxt "model:ir.ui.menu,name:menu_shop_view"
+msgid "Shop"
+msgstr "Tienda"
+
+msgctxt "model:stock.shipment.ecommerce.shop,name:"
+msgid "Shop"
+msgstr "Tienda"
+
+msgctxt "selection:stock.shipment.ecommerce.shop,type:"
+msgid "Shopify"
+msgstr "Shopify"
+
+msgctxt "view:stock.shipment.ecommerce.shop:"
+msgid "Update"
+msgstr "Actualizar"
