@@ -1,11 +1,10 @@
-from trytond.model import (ModelSQL, ModelView, Model, fields)
+from trytond.model import ModelSQL, ModelView, fields
 from trytond.pool import Pool, PoolMeta
 from trytond.i18n import gettext
 from trytond.exceptions import UserError
 import shopify
 import json
 import os.path
-from pyactiveresource.util import xml_to_dict
 from trytond.pyson import Eval, Bool
 
 
@@ -38,13 +37,11 @@ class Shop(ModelSQL, ModelView):
     def update_shopify(self):
         pool = Pool()
         Shipment = pool.get('stock.shipment.out')
-        Address =  pool.get('party.address')
+        Address = pool.get('party.address')
         Party = pool.get('party.party')
         PartyIdentifier = pool.get('party.identifier')
         Move = pool.get('stock.move')
-        ProductTemplate = pool.get('product.template')
         Product = pool.get('product.product')
-        Location = pool.get('stock.location')
         Country = pool.get('country.country')
         Subdivision = pool.get('country.subdivision')
         url = 'https://{}:{}@{}'.format(self.api_key, self.api_password, self.url)
@@ -57,7 +54,8 @@ class Shop(ModelSQL, ModelView):
         else:
             # test update
             # loads order_1.json into orders list
-            path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tests/order_1.json')
+            path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                'tests/order_1.json')
             with open(path) as json_file:
                 order_json = json.load(json_file)['order']
             order = shopify.Order(order_json)
@@ -76,7 +74,8 @@ class Shop(ModelSQL, ModelView):
             if hasattr(order, 'customer') and order.customer:
                 customer = order.customer
             else:
-                raise UserError(gettext('stock.shipment.ecommerce.missing_customer',
+                raise UserError(
+                    gettext('stock_shipment_ecommerce.missing_customer',
                         order=order.order_number, shop=self.name))
 
             parties = Party.search([
@@ -113,14 +112,18 @@ class Shop(ModelSQL, ModelView):
                 countries = Country.search([
                         ('code', '=', shipping_address.country_code)], limit=1)
                 if not countries:
-                    raise UserError(gettext('stock.shipment.ecommerce.country_not_found',
+                    raise UserError(
+                        gettext('stock_shipment_ecommerce.country_not_found',
                             order=order.order_number, shop=self.name))
                 address.country, = countries
                 if shipping_address.province_code:
-                    sub_code = address.country.code +'-'+shipping_address.province_code
+                    sub_code = (address.country.code +'-'
+                        +shipping_address.province_code)
                     subdivisions = Subdivision.search([('code', '=', sub_code )])
                     if not subdivisions:
-                        raise UserError(gettext('stock.shipment.ecommerce.subdivision_not_found',
+                        raise UserError(
+                            gettext('stock_shipment_ecommerce.'
+                                'subdivision_not_found',
                                  order=order.order_number, shop=self.name))
                     else:
                         address.subdivision, = subdivisions
@@ -153,9 +156,10 @@ class Shop(ModelSQL, ModelView):
                         ('party_code', '=', line.sku),
                         ], limit=1)
                 if not products:
-                    raise (UserError(gettext('stock.shipment.ecommerce.missing_product',
-                            product=line.product_id,
-                            order=order.order_number, shop=self.name)))
+                    raise UserError(
+                        gettext('stock_shipment_ecommerce.missing_product',
+                            product=line.sku,
+                            order=order.order_number, shop=self.name))
 
                 product, = products
                 move.product = product
@@ -176,8 +180,10 @@ class Shop(ModelSQL, ModelView):
 
 class ShipmentOut(metaclass=PoolMeta):
     __name__ = 'stock.shipment.out'
-    origin_party = fields.Many2One('party.party', 'Origin Party', readonly=True)
-    shop = fields.Many2One('stock.shipment.ecommerce.shop', 'Shop', readonly=True)
+    origin_party = fields.Many2One('party.party', 'Origin Party',
+        readonly=True)
+    shop = fields.Many2One('stock.shipment.ecommerce.shop', 'Shop',
+        readonly=True)
     shop_order_id = fields.Char('Shop Order ID', readonly=True)
     json_order = fields.Text("Order's JSON", readonly=True)
 
@@ -217,5 +223,6 @@ class Cron(metaclass=PoolMeta):
     def __setup__(cls):
         super(Cron, cls).__setup__()
         cls.method.selection.append(
-            ('stock.shipment.ecommerce.shop|update_shop_shipments_cron', "Update Shipments"),
+            ('stock.shipment.ecommerce.shop|update_shop_shipments_cron',
+            "Update Shipments"),
             )
