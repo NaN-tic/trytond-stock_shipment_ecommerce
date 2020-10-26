@@ -9,6 +9,7 @@ def register():
         shop.Cron,
         shop.Shop,
         shop.ShipmentOut,
+        shop.Party,
         shop.PartyIdentifier,
         shop.Template,
         shop.Product,
