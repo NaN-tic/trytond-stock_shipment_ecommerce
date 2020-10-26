@@ -86,6 +86,7 @@ class Shop(ModelSQL, ModelView):
             if not parties:
                 party = Party()
                 party.name = shipping_address.name
+                party.shop = self
                 party.save()
                 identifier = PartyIdentifier()
                 identifier.party = party
@@ -179,6 +180,12 @@ class ShipmentOut(metaclass=PoolMeta):
     shop = fields.Many2One('stock.shipment.ecommerce.shop', 'Shop', readonly=True)
     shop_order_id = fields.Char('Shop Order ID', readonly=True)
     json_order = fields.Text("Order's JSON", readonly=True)
+
+
+class Party(metaclass=PoolMeta):
+    __name__ = 'party.party'
+    shop = fields.Many2One('stock.shipment.ecommerce.shop', 'Shop',
+        readonly=True)
 
 
 class PartyIdentifier(metaclass=PoolMeta):
