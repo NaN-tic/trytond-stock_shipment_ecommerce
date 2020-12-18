@@ -2,17 +2,24 @@ from trytond.model import ModelSQL, ModelView, fields
 from trytond.pool import Pool, PoolMeta
 from trytond.i18n import gettext
 from trytond.exceptions import UserError
+from trytond.pyson import Eval, Bool
 import shopify
 import json
 import os.path
-from trytond.pyson import Eval, Bool
 
+TYPES = [
+    ('shopify','Shopify'),
+    ('flask','Flask'),
+]
+
+URL = 'http://0.0.0.0:5002'
+#URL = config.get('web', 'url')
 
 class Shop(ModelSQL, ModelView):
     "Shop"
     __name__ = 'stock.shipment.ecommerce.shop'
     name = fields.Char('Name', required=True)
-    type = fields.Selection([('shopify','Shopify'),], 'Type', required=True)
+    type = fields.Selection(TYPES, 'Type', required=True)
     api_key = fields.Char('API Key',
         states={'required': Eval('type') == 'shopify'}, depends=['type'])
     api_password = fields.Char('API Password',
@@ -34,34 +41,56 @@ class Shop(ModelSQL, ModelView):
             meth = getattr(record, 'update_%s' % record.type)
             meth()
 
-    def update_shopify(self):
+    def update_shopify(self, orders=None):
         pool = Pool()
         Shipment = pool.get('stock.shipment.out')
         Address = pool.get('party.address')
         Party = pool.get('party.party')
         PartyIdentifier = pool.get('party.identifier')
         Move = pool.get('stock.move')
+        Template = pool.get('product.template')
         Product = pool.get('product.product')
         Country = pool.get('country.country')
         Subdivision = pool.get('country.subdivision')
+        ProductUOM = pool.get('product.uom')
+        Lang = pool.get('ir.lang')
+
         url = 'https://{}:{}@{}'.format(self.api_key, self.api_password, self.url)
 
         shopify.ShopifyResource.set_site(url)
 
-        if self.name != 'TestShop':
-            # real update
-            orders_list = shopify.Order.find()
+        if not orders:
+            if self.name != 'TestShop':
+                # real update
+                orders_list = shopify.Order.find()
+            else:
+                # test update
+                # loads order_1.json into orders list
+                path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                    'tests/order_1.json')
+                with open(path) as json_file:
+                    order_json = json.load(json_file)['order']
+                order = shopify.Order(order_json)
+                orders_list = [order]
         else:
-            # test update
-            # loads order_1.json into orders list
-            path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                'tests/order_1.json')
-            with open(path) as json_file:
-                order_json = json.load(json_file)['order']
-            order = shopify.Order(order_json)
-            orders_list = [order]
+            orders_list = []
+            for order in orders:
+                order = shopify.Order(order)
+                orders_list.append(order)
+
+            spanish = Lang.search([
+                ('name', '=', 'Spanish')
+                ], limit=1)
+            english = Lang.search([
+                ('name', '=', 'English')
+                ], limit=1)
+            unit_uom = ProductUOM.search([
+                ('name', '=', 'Unit')
+                ], limit=1)
 
         shipments_to_save = []
+        templates_to_save = []
+        products_to_save = []
         for order in orders_list:
             existent_shipment = Shipment.search([
                 ('shop_order_id', '=', order.id),
@@ -74,9 +103,14 @@ class Shop(ModelSQL, ModelView):
             if hasattr(order, 'customer') and order.customer:
                 customer = order.customer
             else:
-                raise UserError(
-                    gettext('stock_shipment_ecommerce.missing_customer',
-                        order=order.order_number, shop=self.name))
+                if not orders:
+                    raise UserError(
+                        gettext('stock_shipment_ecommerce.missing_customer',
+                            order=order.order_number, shop=self.name))
+                else:
+                    status = 'KO'
+                    message = 'Missing customer on order '+ str(order.order_number)
+                    return {'status':status,'message':message}
 
             parties = Party.search([
                     ('identifiers.code', '=', customer.id),
@@ -86,6 +120,11 @@ class Shop(ModelSQL, ModelView):
                 party = Party()
                 party.name = shipping_address.name
                 party.shop = self
+                if orders:
+                    if order.shipping_address.country_code == 'ES':
+                        party.lang, = spanish
+                    else:
+                        party.lang, = english
                 party.save()
                 identifier = PartyIdentifier()
                 identifier.party = party
@@ -112,19 +151,30 @@ class Shop(ModelSQL, ModelView):
                 countries = Country.search([
                         ('code', '=', shipping_address.country_code)], limit=1)
                 if not countries:
-                    raise UserError(
-                        gettext('stock_shipment_ecommerce.country_not_found',
-                            order=order.order_number, shop=self.name))
+                    if not orders:
+                        raise UserError(
+                            gettext('stock_shipment_ecommerce.country_not_found',
+                                order=order.order_number, shop=self.name))
+                    else:
+                        status = 'KO'
+                        message = 'Missing country on order '+ str(order.order_number)
+                        return {'status':status,'message':message}
+
                 address.country, = countries
                 if shipping_address.province_code:
                     sub_code = (address.country.code +'-'
                         +shipping_address.province_code)
                     subdivisions = Subdivision.search([('code', '=', sub_code )])
                     if not subdivisions:
-                        raise UserError(
-                            gettext('stock_shipment_ecommerce.'
-                                'subdivision_not_found',
-                                 order=order.order_number, shop=self.name))
+                        if not orders:
+                            raise UserError(
+                                gettext('stock_shipment_ecommerce.'
+                                    'subdivision_not_found',
+                                    order=order.order_number, shop=self.name))
+                        else:
+                            status = 'KO'
+                            message = 'Missing subdivision on order '+ str(order.order_number)
+                            return {'status':status,'message':message}
                     else:
                         address.subdivision, = subdivisions
                 address.party = party
@@ -156,10 +206,33 @@ class Shop(ModelSQL, ModelView):
                         ('party_code', '=', line.sku),
                         ], limit=1)
                 if not products:
-                    raise UserError(
-                        gettext('stock_shipment_ecommerce.missing_product',
-                            product=line.sku,
-                            order=order.order_number, shop=self.name))
+                    if not orders:
+                        raise UserError(
+                            gettext('stock_shipment_ecommerce.missing_product',
+                                product=line.sku,
+                                order=order.order_number, shop=self.name))
+                    else:
+                        products = []
+                        template = Template()
+                        template.name = line.title
+                        template.type = 'goods'
+                        template.default_uom, = unit_uom
+                        template.party = self.party
+                        template.list_price = 0
+                        #templates_to_save.append(template)
+                        Template.save([template])
+                        product = Product()
+                        product.code = line.sku
+                        product.cost_price = 0
+                        product.template = template
+                        product.party_code = line.sku
+                        #products_to_save.append(product)
+                        Product.save([product])
+                        products.append(product)
+                        #TODO: check if shop.party have electronic mail in
+                        #her contact mechanism and use it to sen email with
+                        #new products send_product_created_mail(product,
+                        #shop.party)
 
                 product, = products
                 move.product = product
@@ -167,8 +240,16 @@ class Shop(ModelSQL, ModelView):
                 move.unit_price = product.list_price
                 moves.append(move)
             shipment.outgoing_moves = tuple(moves)
+
+        Template.save(templates_to_save)
+        Product.save(products_to_save)
         Shipment.save(shipments_to_save)
         Shipment.wait(shipments_to_save)
+
+        if orders:
+            status = 'OK'
+            message = [s.id for s in shipments_to_save ]
+            return {'status':status,'order_list':message}
 
     @classmethod
     def __setup__(cls):
