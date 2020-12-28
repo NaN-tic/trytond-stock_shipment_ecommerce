@@ -12,5 +12,8 @@
         <record model="ir.message" id="subdivision_not_found">
             <field name="text">Missing subdivision on order "%(order)s" from shop "%(shop)s"</field>
         </record>
+        <record model="ir.message" id="shop_connection_failed">
+            <field name="text">The connection to the shop has failed, check the shop credentials</field>
+        </record>
     </data>
 </tryton>
