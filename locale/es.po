@@ -34,6 +34,10 @@ msgctxt "field:stock.shipment.ecommerce.shop,warehouse:"
 msgid "Warehouse"
 msgstr "Almacén"
 
+msgctxt "field:stock.shipment.out,customer_phone_numbers:"
+msgid "Customer Phone Numbers"
+msgstr "Teléfonos del cliente"
+
 msgctxt "model:ir.action,name:act_shop"
 msgid "Shop"
 msgstr "Tienda"
@@ -55,6 +59,10 @@ msgid "Missing product \"%(product)s\" on order \"%(order)s\" from shop \"%(shop
 msgstr ""
 "No se ha encontrado el producto \"%(product)s\" en el pedido \"%(order)s\" "
 "de la tienda \"%(shop)s\""
+
+msgctxt "model:ir.message,text:shop_connection_failed"
+msgid "The connection to the shop has failed, check the shop credentials"
+msgstr "La conexión con la tienda ha fallado, revise las credenciales"
 
 msgctxt "model:ir.message,text:subdivision_not_found"
 msgid "Missing subdivision on order \"%(order)s\" from shop \"%(shop)s\""

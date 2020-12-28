@@ -12,7 +12,7 @@ class Shop(ModelSQL, ModelView):
     "Shop"
     __name__ = 'stock.shipment.ecommerce.shop'
     name = fields.Char('Name', required=True)
-    type = fields.Selection([('shopify','Shopify'),], 'Type', required=True)
+    type = fields.Selection([('shopify', 'Shopify'), ], 'Type', required=True)
     api_key = fields.Char('API Key',
         states={'required': Eval('type') == 'shopify'}, depends=['type'])
     api_password = fields.Char('API Password',
@@ -50,7 +50,11 @@ class Shop(ModelSQL, ModelView):
 
         if self.name != 'TestShop':
             # real update
-            orders_list = shopify.Order.find()
+            try:
+                orders_list = shopify.Order.find()
+            except:
+                raise UserError(
+                    gettext('stock_shipment_ecommerce.shop_connection_failed'))
         else:
             # test update
             # loads order_1.json into orders list
@@ -67,7 +71,7 @@ class Shop(ModelSQL, ModelView):
                 ('shop_order_id', '=', order.id),
                 ('shop', '=', self.id)
                 ])
-            if existent_shipment :
+            if existent_shipment:
                 continue
 
             shipping_address = order.shipping_address
@@ -81,7 +85,7 @@ class Shop(ModelSQL, ModelView):
             parties = Party.search([
                     ('identifiers.code', '=', customer.id),
                     ('identifiers.type', '=', 'shop')
-                    ], limit = 1)
+                    ], limit=1)
             if not parties:
                 party = Party()
                 party.name = shipping_address.name
@@ -117,9 +121,9 @@ class Shop(ModelSQL, ModelView):
                             order=order.order_number, shop=self.name))
                 address.country, = countries
                 if shipping_address.province_code:
-                    sub_code = (address.country.code +'-'
+                    sub_code = (address.country.code + '-'
                         +shipping_address.province_code)
-                    subdivisions = Subdivision.search([('code', '=', sub_code )])
+                    subdivisions = Subdivision.search([('code', '=', sub_code)])
                     if not subdivisions:
                         raise UserError(
                             gettext('stock_shipment_ecommerce.'
@@ -142,6 +146,7 @@ class Shop(ModelSQL, ModelView):
             shipment.warehouse = self.warehouse
             shipment.state = 'draft'
             shipment.json_order = order.to_json()
+            shipment.customer_phone_numbers = get_customer_phone_numbers(order)
             shipments_to_save.append(shipment)
 
             moves = []
@@ -178,6 +183,16 @@ class Shop(ModelSQL, ModelView):
             })
 
 
+def get_customer_phone_numbers(order):
+    phones = [
+        order.phone,
+        order.shipping_address.phone,
+        order.customer.phone
+        ]
+    phones = set([n.strip() for n in phones if n and n.strip()])
+    return ', '.join(phones)
+
+
 class ShipmentOut(metaclass=PoolMeta):
     __name__ = 'stock.shipment.out'
     origin_party = fields.Many2One('party.party', 'Origin Party',
@@ -186,6 +201,14 @@ class ShipmentOut(metaclass=PoolMeta):
         readonly=True)
     shop_order_id = fields.Char('Shop Order ID', readonly=True)
     json_order = fields.Text("Order's JSON", readonly=True)
+    customer_phone_numbers = fields.Char('Customer Phone Numbers')
+
+    @fields.depends('customer')
+    def on_change_customer(self):
+        super(ShipmentOut, self).on_change_customer()
+        if self.customer and not self.customer_phone_numbers:
+            self.customer_phone_numbers = ', '.join(
+                set([self.customer.phone, self.customer.mobile]))
 
 
 class Party(metaclass=PoolMeta):

@@ -13,6 +13,8 @@ contains the full copyright notices and license terms. -->
         <field name="shop_order_id"/>
         <label name="json_order"/>
         <field name="json_order"/>
+        <label name="customer_phone_numbers"/>
+        <field name="customer_phone_numbers"/>
     </xpath>
 
 </data>

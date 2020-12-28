@@ -4,6 +4,7 @@
 from trytond.pool import Pool
 from . import shop
 
+
 def register():
     Pool.register(
         shop.Cron,
