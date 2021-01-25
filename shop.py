@@ -203,7 +203,7 @@ class ShipmentOut(metaclass=PoolMeta):
     json_order = fields.Text("Order's JSON", readonly=True)
     customer_phone_numbers = fields.Char('Customer Phone Numbers')
 
-    @fields.depends('customer')
+    @fields.depends('customer', 'customer_phone_numbers')
     def on_change_customer(self):
         super(ShipmentOut, self).on_change_customer()
         if self.customer and not self.customer_phone_numbers:
