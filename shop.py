@@ -224,10 +224,24 @@ def get_customer_phone_numbers(order):
     return ', '.join(phones)
 
 
-class ShipmentOut(metaclass=PoolMeta):
+class ShipmentMixin:
+    origin_party = fields.Many2One('party.party', 'Origin Party')
+
+
+class ShipmentOutReturn(ShipmentMixin, metaclass=PoolMeta):
+    __name__ = 'stock.shipment.out.return'
+
+
+class ShipmentIn(ShipmentMixin, metaclass=PoolMeta):
+    __name__ = 'stock.shipment.in'
+
+
+class ShipmentInReturn(ShipmentMixin, metaclass=PoolMeta):
+    __name__ = 'stock.shipment.in.return'
+
+
+class ShipmentOut(ShipmentMixin, metaclass=PoolMeta):
     __name__ = 'stock.shipment.out'
-    origin_party = fields.Many2One('party.party', 'Origin Party',
-        readonly=True)
     shop = fields.Many2One('stock.shipment.ecommerce.shop', 'Shop',
         readonly=True)
     shop_order_id = fields.Char('Shop Order ID', readonly=True)
