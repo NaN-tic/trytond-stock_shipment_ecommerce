@@ -199,7 +199,7 @@ class ShipmentMixin:
 
 class ShipmentOutReturn(ShipmentMixin, metaclass=PoolMeta):
     __name__ = 'stock.shipment.out.return'
-
+    sale_date = fields.Date('Sale Date')
 
 class ShipmentIn(ShipmentMixin, metaclass=PoolMeta):
     __name__ = 'stock.shipment.in'
