@@ -11,6 +11,8 @@ contains the full copyright notices and license terms. -->
     <xpath expr="/form/notebook/page[@id='other']/field[@name='done_by']" position="after">
         <label name="shop_order_id"/>
         <field name="shop_order_id"/>
+        <label name="sale_date"/>
+        <field name="sale_date"/>
         <label name="json_order"/>
         <field name="json_order"/>
         <label name="customer_phone_numbers"/>

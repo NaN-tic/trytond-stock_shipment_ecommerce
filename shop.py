@@ -247,6 +247,7 @@ class ShipmentOut(ShipmentMixin, metaclass=PoolMeta):
     shop_order_id = fields.Char('Shop Order ID', readonly=True)
     json_order = fields.Text("Order's JSON", readonly=True)
     customer_phone_numbers = fields.Char('Customer Phone Numbers')
+    sale_date = fields.Date('Sale Date')
 
     @fields.depends('customer', 'customer_phone_numbers')
     def on_change_customer(self):
