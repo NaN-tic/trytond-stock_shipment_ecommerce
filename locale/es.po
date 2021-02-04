@@ -6,6 +6,18 @@ msgctxt "field:party.party,shop:"
 msgid "Shop"
 msgstr "Tienda"
 
+msgctxt "field:product.product,party:"
+msgid "Party"
+msgstr "Terceros"
+
+msgctxt "field:product.product,party_code:"
+msgid "Party Code"
+msgstr "Código"
+
+msgctxt "field:product.template,party:"
+msgid "Party"
+msgstr "Terceros"
+
 msgctxt "field:stock.shipment.ecommerce.shop,api_key:"
 msgid "API Key"
 msgstr "Clave API"
@@ -13,6 +25,10 @@ msgstr "Clave API"
 msgctxt "field:stock.shipment.ecommerce.shop,api_password:"
 msgid "API Password"
 msgstr "Contraseña API"
+
+msgctxt "field:stock.shipment.ecommerce.shop,create_products:"
+msgid "Create Products"
+msgstr "Crear productos"
 
 msgctxt "field:stock.shipment.ecommerce.shop,name:"
 msgid "Name"
@@ -34,9 +50,45 @@ msgctxt "field:stock.shipment.ecommerce.shop,warehouse:"
 msgid "Warehouse"
 msgstr "Almacén"
 
+msgctxt "field:stock.shipment.in,origin_party:"
+msgid "Origin Party"
+msgstr "Tercero Origen"
+
+msgctxt "field:stock.shipment.in.return,origin_party:"
+msgid "Origin Party"
+msgstr "Tercero"
+
 msgctxt "field:stock.shipment.out,customer_phone_numbers:"
 msgid "Customer Phone Numbers"
 msgstr "Teléfonos del cliente"
+
+msgctxt "field:stock.shipment.out,json_order:"
+msgid "Order's JSON"
+msgstr ""
+
+msgctxt "field:stock.shipment.out,origin_party:"
+msgid "Origin Party"
+msgstr "Tercero Origen"
+
+msgctxt "field:stock.shipment.out,sale_date:"
+msgid "Sale Date"
+msgstr "Fecha venta"
+
+msgctxt "field:stock.shipment.out,shop:"
+msgid "Shop"
+msgstr "Tienda"
+
+msgctxt "field:stock.shipment.out,shop_order_id:"
+msgid "Shop Order ID"
+msgstr ""
+
+msgctxt "field:stock.shipment.out.return,origin_party:"
+msgid "Origin Party"
+msgstr "Tercero Origen"
+
+msgctxt "field:stock.shipment.out.return,sale_date:"
+msgid "Sale Date"
+msgstr "Fecha venta"
 
 msgctxt "model:ir.action,name:act_shop"
 msgid "Shop"
@@ -81,6 +133,18 @@ msgstr "Tienda"
 msgctxt "model:stock.shipment.ecommerce.shop,name:"
 msgid "Shop"
 msgstr "Tienda"
+
+msgctxt "selection:ir.cron,method:"
+msgid "Update Shipments"
+msgstr ""
+
+msgctxt "selection:party.identifier,type:"
+msgid "Shop"
+msgstr "Tienda"
+
+msgctxt "selection:stock.shipment.ecommerce.shop,type:"
+msgid "Flask"
+msgstr ""
 
 msgctxt "selection:stock.shipment.ecommerce.shop,type:"
 msgid "Shopify"

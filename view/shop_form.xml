@@ -16,6 +16,8 @@
     <field name="url"/>
     <label name="warehouse"/>
     <field name="warehouse"/>
+    <label name="create_products"/>
+    <field name="create_products"/>
     <group col="4" colspan="4" id="buttons">
         <button name="update_shop_shipments" string="Update"/>
     </group>
