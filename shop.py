@@ -21,6 +21,11 @@ class Shop(ModelSQL, ModelView):
     party = fields.Many2One('party.party', 'Party', required=True)
     warehouse = fields.Many2One('stock.location', 'Warehouse',
         domain=[('type', '=', 'warehouse')], required=True)
+    create_products = fields.Boolean('Create Products')
+
+    @staticmethod
+    def deafult_create_products():
+        return False
 
     @classmethod
     def update_shop_shipments_cron(cls):
@@ -42,9 +47,13 @@ class Shop(ModelSQL, ModelView):
         PartyIdentifier = pool.get('party.identifier')
         Move = pool.get('stock.move')
         Product = pool.get('product.product')
+        Template = pool.get('product.template')
         Country = pool.get('country.country')
         Subdivision = pool.get('country.subdivision')
-        url = 'https://{}:{}@{}'.format(self.api_key, self.api_password, self.url)
+        ProductUOM = pool.get('product.uom')
+
+        url = 'https://{}:{}@{}'.format(self.api_key, self.api_password,
+            self.url)
 
         shopify.ShopifyResource.set_site(url)
 
@@ -64,6 +73,10 @@ class Shop(ModelSQL, ModelView):
                 order_json = json.load(json_file)['order']
             order = shopify.Order(order_json)
             orders_list = [order]
+
+        unit_uom = ProductUOM.search([
+                ('name', '=', 'Unit')
+                ], limit=1)
 
         shipments_to_save = []
         for order in orders_list:
@@ -122,7 +135,7 @@ class Shop(ModelSQL, ModelView):
                 address.country, = countries
                 if shipping_address.province_code:
                     sub_code = (address.country.code + '-'
-                        +shipping_address.province_code)
+                        + shipping_address.province_code)
                     subdivisions = Subdivision.search([('code', '=', sub_code)])
                     if not subdivisions:
                         raise UserError(
@@ -147,6 +160,7 @@ class Shop(ModelSQL, ModelView):
             shipment.state = 'draft'
             shipment.json_order = order.to_json()
             shipment.customer_phone_numbers = get_customer_phone_numbers(order)
+            shipment.comment = order.note
             shipments_to_save.append(shipment)
 
             moves = []
@@ -160,12 +174,26 @@ class Shop(ModelSQL, ModelView):
                         ('template.party', '=', self.party),
                         ('party_code', '=', line.sku),
                         ], limit=1)
-                if not products:
+                if not products and not self.create_products:
                     raise UserError(
                         gettext('stock_shipment_ecommerce.missing_product',
                             product=line.sku,
                             order=order.order_number, shop=self.name))
-
+                else:
+                    template = Template()
+                    template.name = line.title
+                    template.type = 'goods'
+                    template.default_uom, = unit_uom
+                    template.party = self.party
+                    template.list_price = 0
+                    template.save()
+                    product = Product()
+                    product.code = line.sku
+                    product.cost_price = 0
+                    product.template = template
+                    product.party_code = line.sku
+                    product.save()
+                    products = [product]
                 product, = products
                 move.product = product
                 move.uom = product.default_uom
