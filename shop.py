@@ -74,9 +74,10 @@ class Shop(ModelSQL, ModelView):
             order = shopify.Order(order_json)
             orders_list = [order]
 
-        unit_uom = ProductUOM.search([
-                ('name', '=', 'Unit')
+        unit_uom, = ProductUOM.search([
+                ('symbol', '=', 'u')
                 ], limit=1)
+
 
         shipments_to_save = []
         for order in orders_list:
@@ -183,7 +184,7 @@ class Shop(ModelSQL, ModelView):
                     template = Template()
                     template.name = line.title
                     template.type = 'goods'
-                    template.default_uom, = unit_uom
+                    template.default_uom = unit_uom
                     template.party = self.party
                     template.list_price = 0
                     template.save()
