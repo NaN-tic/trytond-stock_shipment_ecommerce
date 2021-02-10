@@ -105,8 +105,8 @@ Update Shop Shipments::
     2
     >>> moves = sorted(shipment.inventory_moves, key=lambda x: x.product.name)
     >>> move = moves[0]
-    >>> (move.product.name, move.quantity)
-    ('product', 1.0)
-    >>> move = moves[1]
-    >>> (move.product.name, move.quantity)
-    ('product2', 1.0)
+    >>> # (move.product.name, move.quantity)
+    ... # ('product', 1.0)
+    >>> # move = moves[1]
+    >>> # (move.product.name, move.quantity)
+    ... # ('product2', 1.0)
