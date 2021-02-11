@@ -135,14 +135,16 @@ class Shop(ModelSQL, ModelView):
                             order=order.order_number, shop=self.name))
                 address.country, = countries
                 if shipping_address.province_code:
-                    sub_code = (address.country.code + '-'
-                        + shipping_address.province_code)
-                    subdivisions = Subdivision.search([('code', '=', sub_code)])
+                    if '-' not in shipping_address.province_code:
+                        sub_code = (address.country.code + '-'
+                            + shipping_address.province_code)
+                    else:
+                        sub_code = shipping_address.province_code
+                    subdivisions = Subdivision.search(
+                        [('code', '=', sub_code)], limit=1)
                     if not subdivisions:
-                        raise UserError(
-                            gettext('stock_shipment_ecommerce.'
-                                'subdivision_not_found',
-                                 order=order.order_number, shop=self.name))
+                        subdivisions = Subdivision.search(
+                                [('code', 'ilike', sub_code + '%')], limit=1)
                     else:
                         address.subdivision, = subdivisions
                 address.party = party
@@ -175,12 +177,12 @@ class Shop(ModelSQL, ModelView):
                         ('template.party', '=', self.party),
                         ('party_code', '=', line.sku),
                         ], limit=1)
-                if not products and not self.create_products:
-                    raise UserError(
-                        gettext('stock_shipment_ecommerce.missing_product',
-                            product=line.sku,
-                            order=order.order_number, shop=self.name))
-                else:
+                if not products:
+                    if not self.create_products:
+                        raise UserError(
+                            gettext('stock_shipment_ecommerce.missing_product',
+                                product=line.sku,
+                                order=order.order_number, shop=self.name))
                     template = Template()
                     template.name = line.title
                     template.type = 'goods'
