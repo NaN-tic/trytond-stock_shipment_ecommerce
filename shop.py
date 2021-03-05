@@ -267,11 +267,8 @@ class PartyIdentifier(metaclass=PoolMeta):
     __name__ = 'party.identifier'
 
     @classmethod
-    def __setup__(cls):
-        super(PartyIdentifier, cls).__setup__()
-        selection = ('shop', 'Shop')
-        if selection not in cls.type.selection:
-            cls.type.selection.append(selection)
+    def get_types(cls):
+        return super().get_types() + [('shop', 'Shop')]
 
 
 class Template(metaclass=PoolMeta):
