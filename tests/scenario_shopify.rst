@@ -39,7 +39,7 @@ Create Subdivision::
     >>> Subdivision = Model.get('country.subdivision')
     >>> subdivision = Subdivision()
     >>> subdivision.code = 'ES-B'
-    >>> subdivision.country =  country
+    >>> subdivision.country = country
     >>> subdivision.name = 'Barcelona'
     >>> subdivision.type = 'province'
     >>> subdivision.save()
@@ -72,7 +72,6 @@ Create Product::
     >>> product2.party_code = '1234567890'
     >>> product2.save()
     >>> template2.save()
-
 
 Create Shop::
     >>> Warehouse = Model.get('stock.location')
