@@ -4,4 +4,5 @@
 <tree>
     <field name="party"/>
     <field name="name"/>
+    <field name="type"/>
 </tree>

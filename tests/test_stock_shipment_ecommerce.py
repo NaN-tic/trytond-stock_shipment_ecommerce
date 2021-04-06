@@ -2,13 +2,12 @@
 # The COPYRIGHT file at the top level of this repository contains
 # the full copyright notices and license terms.
 import unittest
-
-
-from trytond.tests.test_tryton import ModuleTestCase
-from trytond.tests.test_tryton import suite as test_suite
 import doctest
-from trytond.tests.test_tryton import doctest_teardown
-from trytond.tests.test_tryton import doctest_checker
+
+import trytond.tests.test_tryton
+from trytond.tests.test_tryton import ModuleTestCase
+from trytond.tests.test_tryton import doctest_teardown, doctest_checker
+
 
 class StockShipmentEcommerceTestCase(ModuleTestCase):
     'Test Stock Shipment Ecommerce module'
@@ -16,10 +15,10 @@ class StockShipmentEcommerceTestCase(ModuleTestCase):
 
 
 def suite():
-    suite = test_suite()
+    suite = trytond.tests.test_tryton.suite()
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(
             StockShipmentEcommerceTestCase))
-    suite.addTests(doctest.DocFileSuite('scenario_orders.rst',
+    suite.addTests(doctest.DocFileSuite('scenario_shopify.rst',
             tearDown=doctest_teardown, encoding='utf-8',
             checker=doctest_checker,
             optionflags=doctest.REPORT_ONLY_FIRST_FAILURE))

@@ -1,24 +1,26 @@
 <?xml version="1.0"?>
 <!-- The COPYRIGHT file at the top level of this repository contains the full
      copyright notices and license terms. -->
-<form>
+<form col="6">
     <label name="name"/>
     <field name="name"/>
-    <label name="party"/>
-    <field name="party"/>
     <label name="type"/>
     <field name="type"/>
+    <label name="active"/>
+    <field name="active"/>
+    <label name="party"/>
+    <field name="party"/>
+    <label name="warehouse"/>
+    <field name="warehouse"/>
+    <label name="create_products"/>
+    <field name="create_products"/>
     <label name="api_key"/>
     <field name="api_key"/>
     <label name="api_password"/>
     <field name="api_password"/>
     <label name="url"/>
     <field name="url"/>
-    <label name="warehouse"/>
-    <field name="warehouse"/>
-    <label name="create_products"/>
-    <field name="create_products"/>
-    <group col="4" colspan="4" id="buttons">
-        <button name="update_shop_shipments" string="Update"/>
+    <group col="-1" colspan="3" id="buttons">
+        <button name="update_shop_shipments"/>
     </group>
 </form>
