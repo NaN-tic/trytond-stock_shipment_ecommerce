@@ -10,9 +10,6 @@ class Configuration(metaclass=PoolMeta):
         super().__setup__()
         cls.identifier_types.selection += [('shop', 'Shop')]
 
-    def get_identifier_types(self):
-        return super().get_identifier_types() + [('shop', 'Shop')]
-
 
 class Party(metaclass=PoolMeta):
     __name__ = 'party.party'
