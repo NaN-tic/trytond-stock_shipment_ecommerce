@@ -1,4 +1,4 @@
-from trytond.model import ModelSQL, ModelView, fields
+from trytond.model import ModelSQL, ModelView, fields, DeactivableMixin
 from trytond.pool import Pool, PoolMeta
 from trytond.i18n import gettext
 from trytond.exceptions import UserError
@@ -8,24 +8,50 @@ import os.path
 from trytond.pyson import Eval, Bool
 
 
-class Shop(ModelSQL, ModelView):
+class Shop(DeactivableMixin, ModelSQL, ModelView):
     "Shop"
     __name__ = 'stock.shipment.ecommerce.shop'
     name = fields.Char('Name', required=True)
-    type = fields.Selection([('shopify', 'Shopify'), ], 'Type', required=True)
-    api_key = fields.Char('API Key',
-        states={'required': Eval('type') == 'shopify'}, depends=['type'])
-    api_password = fields.Char('API Password',
-        states={'required': Eval('type') == 'shopify'}, depends=['type'])
+    type = fields.Selection([
+        ('manual', 'Manual'),
+        ('shopify', 'Shopify'),
+        ], 'Type', required=True)
+    api_key = fields.Char('API Key')
+    api_password = fields.Char('API Password')
     url = fields.Char('Shop URL')
     party = fields.Many2One('party.party', 'Party', required=True)
     warehouse = fields.Many2One('stock.location', 'Warehouse',
-        domain=[('type', '=', 'warehouse')], required=True)
+        domain=[
+            ('type', '=', 'warehouse'),
+        ], required=True)
     create_products = fields.Boolean('Create Products')
 
+    @classmethod
+    def __setup__(cls):
+        super().__setup__()
+        # required / invisible fields
+        cls._required_fields = ['shopify']
+        for field in ('api_key', 'api_password', 'url'):
+            getattr(cls, field).states.update({
+                    'required': Eval('type').in_(cls._required_fields),
+                    'invisible': ~Eval('type').in_(cls._required_fields),
+                    })
+            getattr(cls, field).depends.append('type')
+        cls.create_products.states.update({
+                'invisible': ~Eval('type').in_(cls._required_fields),
+                })
+        cls.create_products.depends.append('type')
+        # buttons
+        cls._buttons.update({
+            'update_shop_shipments': {
+                'invisible': ~Eval('type').in_(cls._required_fields),
+                'depends': ['type'],
+                },
+            })
+
     @staticmethod
-    def deafult_create_products():
-        return False
+    def default_type():
+        return 'manual'
 
     @classmethod
     def update_shop_shipments_cron(cls):
@@ -36,8 +62,9 @@ class Shop(ModelSQL, ModelView):
     @ModelView.button
     def update_shop_shipments(cls, records):
         for record in records:
-            meth = getattr(record, 'update_%s' % record.type)
-            meth()
+            if hasattr(record, 'update_%s' % record.type):
+                meth = getattr(record, 'update_%s' % record.type)
+                meth()
 
     def update_shopify(self):
         pool = Pool()
@@ -51,6 +78,7 @@ class Shop(ModelSQL, ModelView):
         Country = pool.get('country.country')
         Subdivision = pool.get('country.subdivision')
         ProductUOM = pool.get('product.uom')
+        ModelData = pool.get('ir.model.data')
 
         url = 'https://{}:{}@{}'.format(self.api_key, self.api_password,
             self.url)
@@ -74,10 +102,7 @@ class Shop(ModelSQL, ModelView):
             order = shopify.Order(order_json)
             orders_list = [order]
 
-        unit_uom, = ProductUOM.search([
-                ('symbol', '=', 'u')
-                ], limit=1)
-
+        unit_uom = ProductUOM(ModelData.get_id('product', 'uom_unit'))
 
         shipments_to_save = []
         for order in orders_list:
@@ -168,11 +193,6 @@ class Shop(ModelSQL, ModelView):
 
             moves = []
             for line in order.line_items:
-                move = Move()
-                move.shipment = shipment
-                move.from_location = self.warehouse.output_location
-                move.to_location = self.party.customer_location
-                move.quantity = line.quantity
                 products = Product.search([
                         ('template.party', '=', self.party),
                         ('party_code', '=', line.sku),
@@ -198,6 +218,12 @@ class Shop(ModelSQL, ModelView):
                     product.save()
                     products = [product]
                 product, = products
+
+                move = Move()
+                move.shipment = shipment
+                move.from_location = self.warehouse.output_location
+                move.to_location = self.party.customer_location
+                move.quantity = line.quantity
                 move.product = product
                 move.uom = product.default_uom
                 move.unit_price = product.list_price
@@ -205,13 +231,6 @@ class Shop(ModelSQL, ModelView):
             shipment.outgoing_moves = tuple(moves)
         Shipment.save(shipments_to_save)
         Shipment.wait(shipments_to_save)
-
-    @classmethod
-    def __setup__(cls):
-        super(Shop, cls).__setup__()
-        cls._buttons.update({
-            'update_shop_shipments': {},
-            })
 
 
 def get_customer_phone_numbers(order):
@@ -232,6 +251,7 @@ class ShipmentOutReturn(ShipmentMixin, metaclass=PoolMeta):
     __name__ = 'stock.shipment.out.return'
     sale_date = fields.Date('Sale Date')
 
+
 class ShipmentIn(ShipmentMixin, metaclass=PoolMeta):
     __name__ = 'stock.shipment.in'
 
@@ -242,8 +262,7 @@ class ShipmentInReturn(ShipmentMixin, metaclass=PoolMeta):
 
 class ShipmentOut(ShipmentMixin, metaclass=PoolMeta):
     __name__ = 'stock.shipment.out'
-    shop = fields.Many2One('stock.shipment.ecommerce.shop', 'Shop',
-        readonly=True)
+    shop = fields.Many2One('stock.shipment.ecommerce.shop', 'Shop')
     shop_order_id = fields.Char('Shop Order ID', readonly=True)
     json_order = fields.Text("Order's JSON", readonly=True)
     customer_phone_numbers = fields.Char('Customer Phone Numbers')
@@ -255,20 +274,6 @@ class ShipmentOut(ShipmentMixin, metaclass=PoolMeta):
         if self.customer and not self.customer_phone_numbers:
             self.customer_phone_numbers = ', '.join(
                 set([self.customer.phone, self.customer.mobile]))
-
-
-class Party(metaclass=PoolMeta):
-    __name__ = 'party.party'
-    shop = fields.Many2One('stock.shipment.ecommerce.shop', 'Shop',
-        readonly=True)
-
-
-class PartyIdentifier(metaclass=PoolMeta):
-    __name__ = 'party.identifier'
-
-    @classmethod
-    def get_types(cls):
-        return super().get_types() + [('shop', 'Shop')]
 
 
 class Template(metaclass=PoolMeta):

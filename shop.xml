@@ -77,7 +77,7 @@
         </record>
         <record model="ir.model.button" id="update_shop_shipments_button">
             <field name="name">update_shop_shipments</field>
-            <field name="string">Update Shop Shipments</field>
+            <field name="string">Update</field>
             <field name="model" search="[('model', '=', 'stock.shipment.ecommerce.shop')]" />
         </record>
         <record model="ir.model.button-res.group" id="update_shop_shipments_button_group_stock">
