@@ -51,29 +51,28 @@ Create Product::
     >>> ProductTemplate = Model.get('product.template')
     >>> Product = Model.get('product.product')
 
-    >>> product = Product()
     >>> template = ProductTemplate()
     >>> template.name = 'product'
     >>> template.default_uom = unit
-    >>> template.list_price = Decimal(30)
+    >>> template.type = 'goods'
+    >>> template.list_price = Decimal('30')
     >>> template.party = party
     >>> product, = template.products
     >>> product.party_code = '0987654321-M'
-    >>> product.save()
     >>> template.save()
 
-    >>> product2 = Product()
     >>> template2 = ProductTemplate()
     >>> template2.name = 'product2'
     >>> template2.default_uom = unit
-    >>> template2.list_price = Decimal(30)
+    >>> template2.type = 'goods'
+    >>> template2.list_price = Decimal('30')
     >>> template2.party = party
     >>> product2, = template2.products
     >>> product2.party_code = '1234567890'
-    >>> product2.save()
     >>> template2.save()
 
 Create Shop::
+
     >>> Warehouse = Model.get('stock.location')
     >>> warehouse, = Warehouse.find([('type', '=', 'warehouse')], limit=1)
     >>> Shop = Model.get('stock.shipment.ecommerce.shop')
