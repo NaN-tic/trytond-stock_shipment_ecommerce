@@ -144,7 +144,7 @@ class Shop(DeactivableMixin, ModelSQL, ModelView):
             address_exist = Address.search([
                     ('party', '=', party),
                     ('street', '=', shipping_address.address1),
-                    ('zip', '=', shipping_address.zip)
+                    ('postal_code', '=', shipping_address.zip)
                     ])
             if address_exist:
                 address = address_exist[0]
@@ -173,7 +173,7 @@ class Shop(DeactivableMixin, ModelSQL, ModelView):
                     else:
                         address.subdivision, = subdivisions
                 address.party = party
-                address.zip = shipping_address.zip
+                address.postal_code = shipping_address.zip
                 address.delivery = True
                 address.save()
 
