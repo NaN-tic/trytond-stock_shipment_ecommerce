@@ -25,6 +25,8 @@ class Shop(DeactivableMixin, ModelSQL, ModelView):
             ('type', '=', 'warehouse'),
         ], required=True)
     create_products = fields.Boolean('Create Products')
+    last_shopify_shipment_id = fields.BigInteger('Last Shopify Shipment ID',
+        readonly=True)
 
     @classmethod
     def __setup__(cls):
@@ -66,6 +68,24 @@ class Shop(DeactivableMixin, ModelSQL, ModelView):
                 meth = getattr(record, 'update_%s' % record.type)
                 meth()
 
+    def get_shopify_orders(self):
+        orders_list = []
+        last_id = self.last_shopify_shipment_id or 0
+        while True:
+            try:
+                current_list = shopify.Order.find(since_id=last_id, limit=250)
+            except Exception:
+                raise UserError(
+                    gettext('stock_shipment_ecommerce.shop_connection_failed'))
+            if not current_list:
+                break
+            orders_list.extend(current_list)
+            last_id = orders_list[-1].id
+
+        self.last_shopify_shipment_id = last_id
+        self.save()
+        return orders_list
+
     def update_shopify(self):
         pool = Pool()
         Shipment = pool.get('stock.shipment.out')
@@ -87,11 +107,7 @@ class Shop(DeactivableMixin, ModelSQL, ModelView):
 
         if self.name != 'TestShop':
             # real update
-            try:
-                orders_list = shopify.Order.find()
-            except:
-                raise UserError(
-                    gettext('stock_shipment_ecommerce.shop_connection_failed'))
+            orders_list = self.get_shopify_orders()
         else:
             # test update
             # loads order_1.json into orders list
