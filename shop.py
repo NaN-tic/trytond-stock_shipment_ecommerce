@@ -218,6 +218,12 @@ class Shop(DeactivableMixin, ModelSQL, ModelView):
             shipment.json_order = order.to_json()
             shipment.customer_phone_numbers = get_customer_phone_numbers(order)
             shipment.comment = order.note
+            for attribute in order.note_attributes:
+                for key, value in attribute.to_dict().items():
+                    if shipment.comment:
+                        shipment.comment += value + '\n'
+                    else:
+                        shipment.comment = value + '\n'
             shipments_to_save.append(shipment)
 
             moves = []
