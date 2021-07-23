@@ -222,8 +222,7 @@ class Shop(DeactivableMixin, ModelSQL, ModelView):
             attributes = []
             for attribute in order.note_attributes:
                 attributes += list(attribute.to_dict().values())
-                if shipment.comment:
-                    shipment.comment += '\n'.join(attribute.to_dict().values())
+                shipment.comment += '\n'.join(attribute.to_dict().values())
             shipments_to_save.append(shipment)
 
             moves = []
