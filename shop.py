@@ -129,7 +129,10 @@ class Shop(DeactivableMixin, ModelSQL, ModelView):
             if existent_shipment:
                 continue
 
-            shipping_address = order.shipping_address
+            # In some cases (ie, the customer will pick the product from the
+            # warehouse) the shipping_address may not exist
+            shipping_address = getattr(order, 'shipping_address', None)
+
             if hasattr(order, 'customer') and order.customer:
                 customer = order.customer
             else:
@@ -141,7 +144,7 @@ class Shop(DeactivableMixin, ModelSQL, ModelView):
                     ('identifiers.code', '=', customer.id),
                     ('identifiers.type', '=', 'shop')
                     ], limit=1)
-            if not parties:
+            if not parties and shipping_address:
                 party = Party()
                 party.name = shipping_address.name
                 party.shop = self
@@ -151,47 +154,58 @@ class Shop(DeactivableMixin, ModelSQL, ModelView):
                 identifier.type = 'shop'
                 identifier.code = customer.id
                 identifier.save()
+            elif not shipping_address:
+                party = self.party
             else:
                 party, = parties
                 if party.name != shipping_address.name:
                     party.name = shipping_address.name
                     party.save()
-
-            address_exist = Address.search([
-                    ('party', '=', party),
-                    ('street', '=', shipping_address.address1),
-                    ('postal_code', '=', shipping_address.zip)
-                    ])
-            if address_exist:
-                address = address_exist[0]
-            else:
-                address = Address()
-                address.street = shipping_address.address1
-                address.city = shipping_address.city
-                countries = Country.search([
-                        ('code', '=', shipping_address.country_code)], limit=1)
-                if not countries:
-                    raise UserError(
-                        gettext('stock_shipment_ecommerce.country_not_found',
-                            order=order.order_number, shop=self.name))
-                address.country, = countries
-                if shipping_address.province_code:
-                    if '-' not in shipping_address.province_code:
-                        sub_code = (address.country.code + '-'
-                            + shipping_address.province_code)
-                    else:
-                        sub_code = shipping_address.province_code
-                    subdivisions = Subdivision.search(
-                        [('code', '=', sub_code)], limit=1)
-                    if not subdivisions:
+            if shipping_address:
+                address_exist = Address.search([
+                        ('party', '=', party),
+                        ('street', '=', shipping_address.address1),
+                        ('postal_code', '=', shipping_address.zip)
+                        ])
+                if address_exist:
+                    address = address_exist[0]
+                else:
+                    address = Address()
+                    address.street = shipping_address.address1
+                    address.city = shipping_address.city
+                    countries = Country.search([
+                            ('code', '=', shipping_address.country_code)], limit=1)
+                    if not countries:
+                        raise UserError(
+                            gettext('stock_shipment_ecommerce.country_not_found',
+                                order=order.order_number, shop=self.name))
+                    address.country, = countries
+                    if shipping_address.province_code:
+                        if '-' not in shipping_address.province_code:
+                            sub_code = (address.country.code + '-'
+                                + shipping_address.province_code)
+                        else:
+                            sub_code = shipping_address.province_code
                         subdivisions = Subdivision.search(
-                                [('code', 'ilike', sub_code + '%')], limit=1)
-                    else:
-                        address.subdivision, = subdivisions
-                address.party = party
-                address.postal_code = shipping_address.zip
-                address.delivery = True
-                address.save()
+                            [('code', '=', sub_code)], limit=1)
+                        if not subdivisions:
+                            subdivisions = Subdivision.search(
+                                    [('code', 'ilike', sub_code + '%')], limit=1)
+                        else:
+                            address.subdivision, = subdivisions
+                    address.party = party
+                    address.postal_code = shipping_address.zip
+                    address.delivery = True
+                    address.save()
+            else:
+                addresses = Address.search([('party', '=', party)])
+                if addresses:
+                    address = addresses[0]
+                else:
+                    raise UserError(gettext(
+                                'stock_shipment_ecommerce.no_pickup_address',
+                                party=party.rec_name, order=order.order_number,
+                                shop=self.name))
 
             shipment = Shipment()
             shipment.customer = party
@@ -204,7 +218,11 @@ class Shop(DeactivableMixin, ModelSQL, ModelView):
             shipment.state = 'draft'
             shipment.json_order = order.to_json()
             shipment.customer_phone_numbers = get_customer_phone_numbers(order)
-            shipment.comment = order.note
+            shipment.comment = order.note or ''
+            attributes = []
+            for attribute in order.note_attributes:
+                attributes += list(attribute.to_dict().values())
+                shipment.comment += '\n'.join(attribute.to_dict().values())
             shipments_to_save.append(shipment)
 
             moves = []
@@ -230,6 +248,13 @@ class Shop(DeactivableMixin, ModelSQL, ModelView):
                     product.code = line.sku
                     product.cost_price = 0
                     product.template = template
+                    if not line.sku:
+                        raise UserError(
+                            gettext(
+                                'stock_shipment_ecommerce.no_product_sku',
+                                product=template.name,
+                                order=order.order_number,
+                                shop=self.name))
                     product.party_code = line.sku
                     product.save()
                     products = [product]
@@ -250,11 +275,17 @@ class Shop(DeactivableMixin, ModelSQL, ModelView):
 
 
 def get_customer_phone_numbers(order):
-    phones = [
-        order.phone,
-        order.shipping_address.phone,
-        order.customer.phone
-        ]
+    if getattr(order, 'shipping_address', None):
+        phones = [
+            order.phone,
+            order.shipping_address.phone,
+            order.customer.phone
+            ]
+    else:
+        phones = [
+            order.phone,
+            order.customer.phone
+            ]
     phones = set([n.strip() for n in phones if n and n.strip()])
     return ', '.join(phones)
 
