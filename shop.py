@@ -208,6 +208,7 @@ class Shop(DeactivableMixin, ModelSQL, ModelView):
                                 shop=self.name))
 
             shipment = Shipment()
+            shipment.sale_date = order.created_at[0:10]
             shipment.customer = party
             shipment.delivery_address = address
             shipment.origin_party = self.party
