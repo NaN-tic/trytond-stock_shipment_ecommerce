@@ -268,12 +268,30 @@ class ShipmentOut(ShipmentMixin, metaclass=PoolMeta):
     customer_phone_numbers = fields.Char('Customer Phone Numbers')
     sale_date = fields.Date('Sale Date')
 
+    @classmethod
+    def __setup__(cls):
+        super(ShipmentOut, cls).__setup__()
+        t = cls.__table__()
+        cls._sql_constraints += [
+            ('shipment_ecommerce_uniq', Unique(t, t.shop, t.shop_order_id),
+                'stock_shipment_ecommerce.msg_shipment_ecommerce_unique'),
+            ]
+
     @fields.depends('customer', 'customer_phone_numbers')
     def on_change_customer(self):
         super(ShipmentOut, self).on_change_customer()
         if self.customer and not self.customer_phone_numbers:
             self.customer_phone_numbers = ', '.join(
                 set([self.customer.phone, self.customer.mobile]))
+
+    @classmethod
+    def copy(cls, shipments, default=None):
+        if default is None:
+            default = {}
+        else:
+            default = default.copy()
+        default.setdefault('shop_order_id', None)
+        return super(ShipmentOut, cls).copy(shipments, default=default)
 
 
 class Template(metaclass=PoolMeta):

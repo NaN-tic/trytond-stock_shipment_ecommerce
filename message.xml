@@ -15,5 +15,8 @@
         <record model="ir.message" id="shop_connection_failed">
             <field name="text">The connection to the shop has failed, check the shop credentials</field>
         </record>
+        <record model="ir.message" id="msg_shipment_ecommerce_unique">
+            <field name="text">The order by shop must be unique.</field>
+        </record>
     </data>
 </tryton>
