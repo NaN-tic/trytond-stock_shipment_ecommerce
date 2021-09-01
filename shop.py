@@ -1,4 +1,4 @@
-from trytond.model import ModelSQL, ModelView, fields, DeactivableMixin
+from trytond.model import ModelSQL, ModelView, fields, Unique, DeactivableMixin
 from trytond.pool import Pool, PoolMeta
 from trytond.i18n import gettext
 from trytond.exceptions import UserError
