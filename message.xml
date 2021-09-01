@@ -18,5 +18,11 @@
         <record model="ir.message" id="msg_shipment_ecommerce_unique">
             <field name="text">Orders must be unique per shop.</field>
         </record>
+         <record model="ir.message" id="no_product_sku">
+            <field name="text">Missing SKU on product "%(product)s" of order "%(order)s" from shop "%(shop)s"</field>
+        </record>
+        <record model="ir.message" id="no_pickup_address">
+            <field name="text">Missing address on party "%(party)s" of order "%(order)s" from shop "%(shop)s"</field>
+        </record>
     </data>
 </tryton>
