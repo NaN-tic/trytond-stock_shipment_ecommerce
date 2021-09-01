@@ -2,6 +2,10 @@
 msgid ""
 msgstr "Content-Type: text/plain; charset=utf-8\n"
 
+msgctxt "model:ir.message,text:msg_invalid_attributes_sequence"
+msgid "Orders must be unique per shop."
+msgstr "Los pedidos deben ser únicos por tienda."
+
 msgctxt "field:party.party,shop:"
 msgid "Shop"
 msgstr "Tienda"
