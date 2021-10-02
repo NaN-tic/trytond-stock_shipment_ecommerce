@@ -292,6 +292,7 @@ def get_customer_phone_numbers(order):
 
 
 class ShipmentMixin:
+    __slots__ = ()
     origin_party = fields.Many2One('party.party', 'Origin Party')
 
 
