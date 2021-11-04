@@ -1,11 +1,12 @@
+from datetime import datetime
 from trytond.model import ModelSQL, ModelView, fields, Unique, DeactivableMixin
 from trytond.pool import Pool, PoolMeta
 from trytond.i18n import gettext
 from trytond.exceptions import UserError
+from trytond.pyson import Eval, Bool
 import shopify
 import json
 import os.path
-from trytond.pyson import Eval, Bool
 
 
 class Shop(DeactivableMixin, ModelSQL, ModelView):
@@ -208,7 +209,8 @@ class Shop(DeactivableMixin, ModelSQL, ModelView):
                                 shop=self.name))
 
             shipment = Shipment()
-            shipment.sale_date = order.created_at[0:10]
+            shipment.sale_date = datetime.strptime(order.created_at[0:10],
+                "%Y-%m-%d").date()
             shipment.customer = party
             shipment.delivery_address = address
             shipment.origin_party = self.party
