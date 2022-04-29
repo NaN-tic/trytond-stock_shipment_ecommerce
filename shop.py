@@ -39,11 +39,11 @@ class Shop(DeactivableMixin, ModelSQL, ModelView):
                     'required': Eval('type').in_(cls._required_fields),
                     'invisible': ~Eval('type').in_(cls._required_fields),
                     })
-            getattr(cls, field).depends.append('type')
+            getattr(cls, field).depends.add('type')
         cls.create_products.states.update({
                 'invisible': ~Eval('type').in_(cls._required_fields),
                 })
-        cls.create_products.depends.append('type')
+        cls.create_products.depends.add('type')
         # buttons
         cls._buttons.update({
             'update_shop_shipments': {
