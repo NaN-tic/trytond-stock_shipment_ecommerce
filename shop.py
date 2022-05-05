@@ -295,7 +295,11 @@ def get_customer_phone_numbers(order):
 
 class ShipmentMixin:
     __slots__ = ()
-    origin_party = fields.Many2One('party.party', 'Origin Party')
+    origin_party = fields.Many2One('party.party', 'Origin Party',
+        context={
+            'company': Eval('company'),
+            },
+        depends=['company'])
 
 
 class ShipmentOutReturn(ShipmentMixin, metaclass=PoolMeta):
