@@ -124,8 +124,8 @@ class Shop(DeactivableMixin, ModelSQL, ModelView):
         shipments_to_save = []
         for order in orders_list:
             existent_shipment = Shipment.search([
-                ('shop_order_id', '=', order.id),
-                ('shop', '=', self.id)
+                ('shop_order_id', '=', str(order.id)),
+                ('shop', '=', self)
                 ])
             if existent_shipment:
                 continue
@@ -142,7 +142,7 @@ class Shop(DeactivableMixin, ModelSQL, ModelView):
                         order=order.order_number, shop=self.name))
 
             parties = Party.search([
-                    ('identifiers.code', '=', customer.id),
+                    ('identifiers.code', '=', str(customer.id)),
                     ('identifiers.type', '=', 'shop')
                     ], limit=1)
             if not parties and shipping_address:
