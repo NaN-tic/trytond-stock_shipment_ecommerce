@@ -18,7 +18,7 @@ class Shop(DeactivableMixin, ModelSQL, ModelView):
         ('shopify', 'Shopify'),
         ], 'Type', required=True)
     api_key = fields.Char('API Key')
-    api_password = fields.Char('API Password')
+    api_password = fields.Char('API Password', strip=False)
     url = fields.Char('Shop URL')
     party = fields.Many2One('party.party', 'Party', required=True)
     warehouse = fields.Many2One('stock.location', 'Warehouse',
