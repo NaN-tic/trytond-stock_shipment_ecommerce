@@ -121,6 +121,9 @@ class Shop(DeactivableMixin, ModelSQL, ModelView):
 
         unit_uom = ProductUOM(ModelData.get_id('product', 'uom_unit'))
 
+        default_values = Shipment.default_get(Shipment._fields.keys(),
+                with_rec_name=False)
+
         shipments_to_save = []
         for order in orders_list:
             existent_shipment = Shipment.search([
@@ -208,7 +211,7 @@ class Shop(DeactivableMixin, ModelSQL, ModelView):
                                 party=party.rec_name, order=order.order_number,
                                 shop=self.name))
 
-            shipment = Shipment()
+            shipment = Shipment(**default_values)
             shipment.sale_date = datetime.strptime(order.created_at[0:10],
                 "%Y-%m-%d").date()
             shipment.customer = party
@@ -271,11 +274,11 @@ class Shop(DeactivableMixin, ModelSQL, ModelView):
                 move.product = product
                 move.uom = product.default_uom
                 move.unit_price = product.list_price
+                move.currency = shipment.company.currency
                 moves.append(move)
             shipment.outgoing_moves = tuple(moves)
         Shipment.save(shipments_to_save)
         Shipment.wait(shipments_to_save)
-
 
 def get_customer_phone_numbers(order):
     if getattr(order, 'shipping_address', None):
