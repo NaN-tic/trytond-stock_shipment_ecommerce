@@ -221,6 +221,7 @@ class Shop(DeactivableMixin, ModelSQL, ModelView):
             shipment.shop_order_id = order.id
             shipment.shop = self.id
             shipment.warehouse = self.warehouse
+            shipment.on_change_warehouse()
             shipment.state = 'draft'
             shipment.json_order = order.to_json()
             shipment.customer_phone_numbers = get_customer_phone_numbers(order)
