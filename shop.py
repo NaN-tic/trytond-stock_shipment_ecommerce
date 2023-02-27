@@ -26,8 +26,9 @@ class Shop(DeactivableMixin, ModelSQL, ModelView):
             ('type', '=', 'warehouse'),
         ], required=True)
     create_products = fields.Boolean('Create Products')
-    last_shopify_shipment_id = fields.BigInteger('Last Shopify Shipment ID',
+    last_shopify_shipment_id = fields.Integer('Last Shopify Shipment ID',
         readonly=True)
+    last_shopify_shipment_id._sql_type = 'BIGINT'
 
     @classmethod
     def __setup__(cls):
