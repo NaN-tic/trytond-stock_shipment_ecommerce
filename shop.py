@@ -274,7 +274,7 @@ class Shop(DeactivableMixin, ModelSQL, ModelView):
                 move.to_location = self.party.customer_location
                 move.quantity = line.quantity
                 move.product = product
-                move.uom = product.default_uom
+                move.unit = product.default_uom
                 move.unit_price = product.list_price
                 move.currency = shipment.company.currency
                 moves.append(move)
