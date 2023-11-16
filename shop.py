@@ -302,7 +302,7 @@ class ShipmentMixin:
     __slots__ = ()
     origin_party = fields.Many2One('party.party', 'Origin Party',
         context={
-            'company': Eval('company'),
+            'company': Eval('company', -1),
             },
         depends=['company'])
 
