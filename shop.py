@@ -362,7 +362,7 @@ class Template(metaclass=PoolMeta):
 class Product(metaclass=PoolMeta):
     __name__ = 'product.product'
     party_code = fields.Char('Party Code',
-        states={'required': Bool(Eval('party'))}, depends=['party'])
+        states={'required': Bool(Eval('party'))})
 
 
 class Cron(metaclass=PoolMeta):
