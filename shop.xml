@@ -78,7 +78,7 @@
         <record model="ir.model.button" id="update_shop_shipments_button">
             <field name="name">update_shop_shipments</field>
             <field name="string">Update</field>
-            <field name="model" search="[('model', '=', 'stock.shipment.ecommerce.shop')]" />
+            <field name="model">stock.shipment.ecommerce.shop</field>
         </record>
         <record model="ir.model.button-res.group" id="update_shop_shipments_button_group_stock">
             <field name="button" ref="update_shop_shipments_button" />
@@ -91,14 +91,14 @@
             <field name="method">stock.shipment.ecommerce.shop|update_shop_shipments_cron</field>
         </record>
         <record model="ir.model.access" id="access_shop">
-            <field name="model" search="[('model', '=', 'stock.shipment.ecommerce.shop')]" />
+            <field name="model">stock.shipment.ecommerce.shop</field>
             <field name="perm_read" eval="False" />
             <field name="perm_write" eval="False" />
             <field name="perm_create" eval="False" />
             <field name="perm_delete" eval="False" />
         </record>
         <record model="ir.model.access" id="access_shop_stock">
-            <field name="model" search="[('model', '=', 'stock.shipment.ecommerce.shop')]" />
+            <field name="model">stock.shipment.ecommerce.shop</field>
             <field name="group" ref="stock.group_stock" />
             <field name="perm_read" eval="True" />
             <field name="perm_write" eval="False" />
@@ -106,7 +106,7 @@
             <field name="perm_delete" eval="False" />
         </record>
         <record model="ir.model.access" id="access_shop_stock_admin">
-            <field name="model" search="[('model', '=', 'stock.shipment.ecommerce.shop')]" />
+            <field name="model">stock.shipment.ecommerce.shop</field>
             <field name="group" ref="stock.group_stock_admin" />
             <field name="perm_read" eval="True" />
             <field name="perm_write" eval="True" />
