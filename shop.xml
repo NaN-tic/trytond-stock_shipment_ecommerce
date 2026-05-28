@@ -84,12 +84,15 @@
             <field name="button" ref="update_shop_shipments_button" />
             <field name="group" ref="stock.group_stock_admin" />
         </record>
+    </data>
+    <data noupdate="1">
         <record model="ir.cron" id="cron_shop_shipments_update">
-            <field name="active" eval="True" />
             <field name="interval_number" eval="1" />
             <field name="interval_type">hours</field>
             <field name="method">stock.shipment.ecommerce.shop|update_shop_shipments_cron</field>
         </record>
+    </data>
+    <data>
         <record model="ir.model.access" id="access_shop">
             <field name="model">stock.shipment.ecommerce.shop</field>
             <field name="perm_read" eval="False" />
